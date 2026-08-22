@@ -17,13 +17,21 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework import routers
-
-from mysite.views import ProductViewSet
+from drf_spectacular.views import SpectacularAPIView,SpectacularSwaggerView
+from mysite.views import ProductViewSet, TgUserViewSet, UserTrackingViewSet
 
 router = routers.DefaultRouter()
 router.register(r'products', ProductViewSet)
+router.register(r'users', TgUserViewSet)
+router.register(r'tracking', UserTrackingViewSet)
 
 urlpatterns = [
+    path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
+    path(
+        "api/docs/",
+        SpectacularSwaggerView.as_view(url_name="schema"),
+        name="swagger-ui",
+    ),
     path('admin/', admin.site.urls),
     path('api/', include(router.urls)),
 ]

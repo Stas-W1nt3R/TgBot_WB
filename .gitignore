@@ -1,0 +1,49 @@
+# Виртуальное окружение
+.venv/
+venv/
+env/
+ENV/
+
+# База данных
+*.sqlite3
+*.db
+
+# Файлы кэша Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Логи
+*.log
+*.log.*
+
+# Медиа-файлы (загруженные пользователями)
+media/
+
+# Секретные файлы
+.env
+.env.local
+*.secret
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Файлы миграций (опционально — если хочешь оставить, удали эту строку)
+*/migrations/*.py
+!*/migrations/__init__.py
+
+# PyTest
+.pytest_cache/
+.coverage
+
+# Django Debug Toolbar
+*_debug.log
+
+# Файлы архивирования
+*.zip
+*.tar.gz
+*.rar
