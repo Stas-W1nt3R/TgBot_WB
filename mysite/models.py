@@ -15,30 +15,27 @@ class TgUser(models.Model):
         verbose_name_plural = 'Tg Users'
 
 
-class Product(models.Model):
+class Cryptocurrency(models.Model):
     name = models.CharField(max_length=100)
-    description = models.TextField()
-    price = models.DecimalField(decimal_places=2, max_digits=10)
-    stock = models.BooleanField()
-    url = models.URLField()
-    shop_name = models.CharField(max_length=100)
+    coin_id = models.CharField(max_length=100, unique=True)
+    price = models.DecimalField(decimal_places=8, max_digits=15)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.name
 
     class Meta:
-        db_table = 'product'
-        verbose_name = 'Product'
-        verbose_name_plural = 'Products'
+        db_table = 'cryptocurrency'
+        verbose_name = 'Cryptocurrency'
 
 
 class UserTracking(models.Model):
     user = models.ForeignKey(TgUser, on_delete=models.CASCADE)
     target_price = models.DecimalField(decimal_places=2, max_digits=10)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    cryptocurrency = models.ForeignKey(Cryptocurrency, on_delete=models.CASCADE)
 
     class Meta:
         db_table = 'user_tracking'
-        unique_together = ('user', 'product')
+        unique_together = ('user', 'cryptocurrency')
         verbose_name = 'User Tracking'
         verbose_name_plural = 'User Tracking'

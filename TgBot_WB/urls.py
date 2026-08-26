@@ -18,10 +18,10 @@ from django.contrib import admin
 from django.urls import path, include
 from rest_framework import routers
 from drf_spectacular.views import SpectacularAPIView,SpectacularSwaggerView
-from mysite.views import ProductViewSet, TgUserViewSet, UserTrackingViewSet
+from mysite.views import CryptocurrencyViewSet, TgUserViewSet, UserTrackingViewSet
 
 router = routers.DefaultRouter()
-router.register(r'products', ProductViewSet)
+router.register(r'products', CryptocurrencyViewSet)
 router.register(r'users', TgUserViewSet)
 router.register(r'tracking', UserTrackingViewSet)
 

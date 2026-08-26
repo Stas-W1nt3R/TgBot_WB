@@ -1,10 +1,10 @@
 from rest_framework import serializers
-from .models import Product, TgUser, UserTracking
+from .models import Cryptocurrency, TgUser, UserTracking
 
 
-class ProductSerializer(serializers.ModelSerializer):
+class CryptocurrencySerializer(serializers.ModelSerializer):
     class Meta:
-        model = Product
+        model = Cryptocurrency
         fields = '__all__'
 
 
@@ -16,8 +16,8 @@ class TgUserSerializer(serializers.ModelSerializer):
 
 class UserTrackingSerializer(serializers.ModelSerializer):
     user = TgUserSerializer(read_only=True)
-    product = ProductSerializer(read_only=True)
+    cryptocurrency = CryptocurrencySerializer(read_only=True)
 
     class Meta:
         model = UserTracking
-        fields = ['user', 'product','target_price']
+        fields = ['user', 'cryptocurrency','target_price']

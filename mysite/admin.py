@@ -1,4 +1,6 @@
 from django.contrib import admin
-from .models import Product
+from .models import Cryptocurrency, TgUser, UserTracking
 
-admin.register(Product)
+admin.register(Cryptocurrency)
+admin.register(TgUser)
+admin.register(UserTracking)

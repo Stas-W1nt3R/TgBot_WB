@@ -78,7 +78,7 @@ WSGI_APPLICATION = 'TgBot_WB.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'TgBot_WB',
+        'NAME': 'TgBot_Cryptocurrency',
         'USER': 'postgres',
         'PASSWORD': 'kondratiev',
         'HOST': 'localhost',
