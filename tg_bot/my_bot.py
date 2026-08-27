@@ -2,13 +2,13 @@ import os
 import sys
 from dotenv import load_dotenv
 import asyncio
-import requests
 from aiogram import Dispatcher, Bot, F
 from aiogram.filters import Command
 from aiogram.types import Message
 from asgiref.sync import sync_to_async
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
+import aiohttp
 
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -22,6 +22,7 @@ django.setup()
 from mysite.models import TgUser, Cryptocurrency, UserTracking
 
 TOKEN = os.getenv('BOT_TOKEN')
+API_KEY = os.getenv('API_KEY')
 bot = Bot(token=TOKEN)
 
 dp = Dispatcher()
@@ -30,6 +31,32 @@ dp = Dispatcher()
 class TrackForm(StatesGroup):
     cryptocurrency = State()
     waiting_for_target_price = State()
+
+session: aiohttp.ClientSession | None = None
+
+async def init_session():
+    global session
+    session = aiohttp.ClientSession()
+
+async def close_session():
+    if session:
+        await session.close()
+
+async def get_cryptocurrency(name: str) -> dict:
+    url = (
+        f'https://api.coingecko.com/api/v3/simple/price?'
+        f'vs_currencies=usd&ids={name}&x_cg_demo_api_key={API_KEY}'
+    )
+    try:
+        async with session.get(url, timeout=aiohttp.ClientTimeout(total=10)) as response:
+            response.raise_for_status()
+            return await response.json()
+    except aiohttp.ClientError as e:
+        print(f"Network error: {e}")
+        return {}
+    except asyncio.TimeoutError:
+        print("Timeout while fetching crypto price")
+        return {}
 
 
 @sync_to_async
@@ -50,7 +77,10 @@ def create_user_tracking(user,target_price, cryptocurrency):
 
 @sync_to_async
 def get_cryptocurrency_by_id(cryptocurrency_id):
-    return Cryptocurrency.objects.get(id=cryptocurrency_id)
+    try:
+        return Cryptocurrency.objects.get(id=cryptocurrency_id)
+    except Cryptocurrency.DoesNotExist:
+        return None
 
 @dp.message(Command('start'))
 async def start_command(message: Message, state: FSMContext):
@@ -74,6 +104,10 @@ async def target_price_command(message: Message, state: FSMContext):
         return
 
     cryptocurrency = await get_cryptocurrency_by_id(cryptocurrency_id)
+    if not cryptocurrency:
+        await message.answer("Монета не найдена в базе. Начните сначала.\nОтправьте название криптовалюты, которую вы хотите отслеживать!")
+        await state.clear()
+        return
 
     await create_user_tracking(user,target_price,cryptocurrency)
     await message.answer(f"Началось отслеживание {cryptocurrency.name} до цены {target_price}$!")
@@ -82,9 +116,8 @@ async def target_price_command(message: Message, state: FSMContext):
 @dp.message(F.text)
 async def text_command(message: Message, state: FSMContext):
     name = message.text.lower().strip()
-    response = requests.get(f'https://api.coingecko.com/api/v3/simple/price?vs_currencies=usd&ids={name}&x_cg_demo_api_key=CG-3GXsFoKutKnWwdoaaGzswqyX')
-    data = response.json()
-    if name not in data:
+    data = await get_cryptocurrency(name)
+    if not data or name not in data:
         await message.answer("Монета не найдена. Попробуйте: Bitcoin, Ethereum, Cardano!")
         return
     price = data[name]['usd']
@@ -96,7 +129,11 @@ async def text_command(message: Message, state: FSMContext):
     await state.set_state(TrackForm.waiting_for_target_price)
 
 async def main():
-    await dp.start_polling(bot)
+    await init_session()
+    try:
+        await dp.start_polling(bot)
+    finally:
+        await close_session()
 
 if __name__ == '__main__':
     asyncio.run(main())
