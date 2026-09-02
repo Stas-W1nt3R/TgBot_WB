@@ -1,0 +1,70 @@
+services:
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: TgBot_Cryptocurrency
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: kondratiev
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+  web:
+    build: .
+    command: >
+      sh -c "python manage.py migrate &&
+             python manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - redis
+    environment:
+      - DB_HOST=db
+      - DB_NAME=TgBot_Cryptocurrency
+      - DB_USER=postgres
+      - DB_PASSWORD=kondratiev
+      - DB_PORT=5432
+      - REDIS_URL=redis://redis:6379/0
+      - SECRET_KEY=django-insecure-dev-key-change-in-production
+
+  celery_worker:
+    build: .
+    command: celery -A TgBot_WB worker --loglevel=info
+    volumes:
+      - .:/app
+    depends_on:
+      - redis
+
+  flower:
+    build: .
+    command: celery -A TgBot_WB flower --port=5555
+    ports:
+      - "5555:5555"
+    depends_on:
+      - redis
+      - celery_worker
+
+  bot:
+    build: .
+    command: >
+      sh -c "sleep 5 &&
+      PYTHONPATH=/app python tg_bot/my_bot.py"
+    volumes:
+      - .:/app
+    env_file: .env
+    depends_on:
+      - db
+      - web
+    restart: unless-stopped
+
+volumes:
+  postgres_data:

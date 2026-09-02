@@ -33,6 +33,7 @@ class UserTracking(models.Model):
     user = models.ForeignKey(TgUser, on_delete=models.CASCADE)
     target_price = models.DecimalField(decimal_places=2, max_digits=10)
     cryptocurrency = models.ForeignKey(Cryptocurrency, on_delete=models.CASCADE)
+    is_active = models.BooleanField(default=True)
 
     class Meta:
         db_table = 'user_tracking'

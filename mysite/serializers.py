@@ -20,4 +20,4 @@ class UserTrackingSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserTracking
-        fields = ['user', 'cryptocurrency','target_price']
+        fields = ['user', 'cryptocurrency','target_price','is_active']

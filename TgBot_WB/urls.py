@@ -21,7 +21,7 @@ from drf_spectacular.views import SpectacularAPIView,SpectacularSwaggerView
 from mysite.views import CryptocurrencyViewSet, TgUserViewSet, UserTrackingViewSet
 
 router = routers.DefaultRouter()
-router.register(r'products', CryptocurrencyViewSet)
+router.register(r'cryptocurrency', CryptocurrencyViewSet)
 router.register(r'users', TgUserViewSet)
 router.register(r'tracking', UserTrackingViewSet)
 

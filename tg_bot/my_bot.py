@@ -9,6 +9,7 @@ from asgiref.sync import sync_to_async
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 import aiohttp
+from mysite.tasks import check_all_price
 
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -84,6 +85,7 @@ def get_cryptocurrency_by_id(cryptocurrency_id):
 
 @dp.message(Command('start'))
 async def start_command(message: Message, state: FSMContext):
+    check_all_price.delay()
     await create_tg_user(message.from_user.id, message.from_user.username)
     await message.answer(f"Добро пожаловать {message.from_user.username}!\nОтправьте название криптовалюты, которую вы хотите отслеживать!")
 
