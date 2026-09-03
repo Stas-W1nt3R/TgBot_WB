@@ -11,3 +11,4 @@ django-celery-results==2.6.0
 django-redis==7.0.0
 redis==8.1.0
 flower==2.1.0
+requests==2.34.2
