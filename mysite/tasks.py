@@ -67,6 +67,6 @@ def check_all_price():
 app.conf.beat_schedule = {
     'check-price': {
         'task': 'mysite.tasks.check_all_price',
-        'schedule': crontab(minute='*/1'),
+        'schedule': crontab(minute='*/10'),
     }
 }
