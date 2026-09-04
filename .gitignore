@@ -48,6 +48,3 @@ media/
 *.tar.gz
 *.rar
 /mysite/migrations/__init__.py
-/mysite/__init__.py
-/tg_bot/__init__.py
-/TgBot_WB/__init__.py

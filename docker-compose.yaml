@@ -38,7 +38,7 @@ services:
 
   celery_worker:
     build: .
-    command: celery -A TgBot_WB worker --loglevel=info
+    command: celery -A TgBot_WB worker --loglevel=info --autoscale=10,2
     volumes:
       - .:/app
     depends_on:
