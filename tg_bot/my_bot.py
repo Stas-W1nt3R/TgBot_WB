@@ -70,11 +70,29 @@ def create_cryptocurrency(name, coin_id, price):
 
 @sync_to_async
 def create_user_tracking(user,target_price, cryptocurrency):
-    tracking, created = UserTracking.objects.get_or_create(user=user, cryptocurrency=cryptocurrency, defaults={'target_price': target_price})
-    if not created and tracking.target_price != target_price:
+    tracking, created = UserTracking.objects.get_or_create(user=user, cryptocurrency=cryptocurrency, defaults={'target_price': target_price, 'is_active': True})
+
+    if not created:
         tracking.target_price = target_price
+        tracking.is_active = True
         tracking.save()
     return tracking
+
+@sync_to_async
+def get_list_trackings(username):
+    try:
+        trackings = UserTracking.objects.filter(user__username=username, is_active=True)
+
+        if not trackings:
+            return "Нет отслеживаемых криптовалют!"
+
+        text = "Список отслеживаемых криптовалют:\n"
+        for tracking in trackings:
+            text += f"{tracking.cryptocurrency.name} : {tracking.target_price}$\n"
+        return text
+
+    except Exception as e:
+        return f"Ошибка при получении данных {e}"
 
 @sync_to_async
 def get_cryptocurrency_by_id(cryptocurrency_id):
@@ -87,6 +105,11 @@ def get_cryptocurrency_by_id(cryptocurrency_id):
 async def start_command(message: Message, state: FSMContext):
     await create_tg_user(message.from_user.id, message.from_user.username)
     await message.answer(f"Добро пожаловать {message.from_user.username}!\nОтправьте название криптовалюты, которую вы хотите отслеживать!")
+
+@dp.message(Command('list'))
+async def list_command(message: Message):
+    text = await get_list_trackings(message.from_user.username)
+    await message.answer(text)
 
 @dp.message(TrackForm.waiting_for_target_price)
 async def target_price_command(message: Message, state: FSMContext):

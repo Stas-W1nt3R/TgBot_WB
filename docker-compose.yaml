@@ -44,6 +44,14 @@ services:
     depends_on:
       - redis
 
+  celery_beat:
+    build: .
+    command: celery -A TgBot_WB beat --loglevel=info
+    volumes:
+      - .:/app
+    depends_on:
+      - redis
+
   flower:
     build: .
     command: celery -A TgBot_WB flower --port=5555
@@ -52,6 +60,7 @@ services:
     depends_on:
       - redis
       - celery_worker
+      - celery_beat
 
   bot:
     build: .
