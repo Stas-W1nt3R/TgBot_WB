@@ -101,6 +101,17 @@ def get_cryptocurrency_by_id(cryptocurrency_id):
     except Cryptocurrency.DoesNotExist:
         return None
 
+@sync_to_async
+def stop_tracking_by_name(username, crypto_name):
+    try:
+        tracking = UserTracking.objects.get(user__username=username, cryptocurrency__name__iexact=crypto_name, is_active=True)
+        tracking.is_active = False
+        tracking.save()
+
+        return f"Отслеживание криптовалюты {crypto_name} прекращено."
+    except UserTracking.DoesNotExist:
+        return f"Отслеживание криптовалюты {crypto_name} не найдено!"
+
 @dp.message(Command('start'))
 async def start_command(message: Message, state: FSMContext):
     await create_tg_user(message.from_user.id, message.from_user.username)
@@ -109,6 +120,17 @@ async def start_command(message: Message, state: FSMContext):
 @dp.message(Command('list'))
 async def list_command(message: Message):
     text = await get_list_trackings(message.from_user.username)
+    await message.answer(text)
+
+@dp.message(Command('stop'))
+async def stop_command(message: Message):
+    args = message.text.split(maxsplit=1)
+    if len(args) < 2:
+        await message.answer(f"Использование /stop <название криптовалюты> ")
+        return
+
+    crypto_name = args[1]
+    text = await stop_tracking_by_name(message.from_user.username, crypto_name)
     await message.answer(text)
 
 @dp.message(TrackForm.waiting_for_target_price)
